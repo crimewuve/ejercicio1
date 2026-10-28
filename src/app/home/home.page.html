@@ -1,21 +1,123 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title> Blank </ion-title>
+<!-- Cabecera del dashboard: título + eficiencia de resolución -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>IT Helpdesk</ion-title>
+    <ion-buttons slot="end">
+      <ion-badge color="light" class="eficiencia-badge">
+        Eficiencia: {{ metrics.eficiencia }}%
+      </ion-badge>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <!-- Dashboard: tarjeta con métricas calculadas dinámicamente -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-subtitle>Monitor de tickets de soporte</ion-card-subtitle>
+      <ion-card-title>{{ metrics.eficiencia }}% de eficiencia de resolución</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" size-md="4" class="metric">
+            <strong>{{ metrics.total }}</strong>
+            <span>Total</span>
+          </ion-col>
+          <ion-col size="6" size-md="4" class="metric">
+            <strong class="ok">{{ metrics.completados }}</strong>
+            <span>Completados</span>
+          </ion-col>
+          <ion-col size="6" size-md="4" class="metric">
+            <strong class="pend">{{ metrics.pendientes }}</strong>
+            <span>Pendientes</span>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>
-      Start with Ionic
-      <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a>
-    </p>
-  </div>
+  <!-- Filtros interactivos (en tiempo real) -->
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-md="6">
+        <ion-searchbar
+          placeholder="Buscar ticket por título o #id"
+          [ngModel]="search"
+          (ngModelChange)="search = $event ?? ''; applyFilters()"
+        ></ion-searchbar>
+      </ion-col>
+      <ion-col size="6" size-md="3">
+        <ion-item>
+          <ion-select
+            label="Estado"
+            labelPlacement="floating"
+            [ngModel]="statusFilter"
+            (ngModelChange)="statusFilter = $event; applyFilters()"
+          >
+            <ion-select-option value="todos">Todos</ion-select-option>
+            <ion-select-option value="pendiente">Pendiente</ion-select-option>
+            <ion-select-option value="completado">Completado</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col size="6" size-md="3">
+        <ion-item>
+          <ion-select
+            label="Prioridad"
+            labelPlacement="floating"
+            [ngModel]="priorityFilter"
+            (ngModelChange)="priorityFilter = $event; applyFilters()"
+          >
+            <ion-select-option value="todas">Todas</ion-select-option>
+            <ion-select-option value="alta">Alta</ion-select-option>
+            <ion-select-option value="media">Media</ion-select-option>
+            <ion-select-option value="baja">Baja</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    @if (hasActiveFilters) {
+      <ion-row>
+        <ion-col>
+          <ion-button size="small" fill="outline" (click)="clearFilters()">
+            Limpiar filtros
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    }
+  </ion-grid>
+
+  <!-- Estados de carga / error / vacío -->
+  @if (loading) {
+    <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
+  } @else if (error) {
+    <div class="center">
+      <p>No se pudieron cargar los tickets.</p>
+      <ion-button (click)="loadTickets()">Reintentar</ion-button>
+    </div>
+  } @else {
+    <ion-note class="count">{{ tickets.length }} ticket(s) mostrados</ion-note>
+
+    <!-- Listado: ion-list + ion-item + ion-avatar + ion-badge -->
+    <ion-list>
+      @for (t of tickets; track t.id) {
+        <ion-item button detail (click)="openAssignModal(t)">
+          <ion-avatar slot="start" class="avatar">
+            <span>{{ initials(t) }}</span>
+          </ion-avatar>
+          <ion-label class="ion-text-wrap">
+            <h2>#{{ t.id }} · {{ t.title }}</h2>
+            <p>Usuario {{ t.userId }} · Prioridad {{ t.priority }}</p>
+          </ion-label>
+          <ion-badge slot="end" [color]="priorityColor(t.priority)">{{ t.priority }}</ion-badge>
+          <ion-badge slot="end" [color]="statusColor(t.status)">{{ t.status }}</ion-badge>
+        </ion-item>
+      } @empty {
+        <ion-item lines="none">
+          <ion-label class="ion-text-center">Sin resultados para los filtros aplicados.</ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
 </ion-content>

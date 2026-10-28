@@ -1,27 +1,60 @@
-#container {
+.eficiencia-badge {
+  padding: 6px 10px;
+  margin-right: 8px;
+  font-size: 13px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  strong {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+
+  .ok {
+    color: var(--ion-color-success);
+  }
+
+  .pend {
+    color: var(--ion-color-warning-shade);
+  }
+
+  span {
+    color: var(--ion-color-medium);
+    font-size: 0.85rem;
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 0;
 }
 
-#container a {
-  text-decoration: none;
+.count {
+  display: block;
+  margin: 4px 0 8px 4px;
+}
+
+// Adaptación a tabletas: contenido centrado y con ancho máximo
+@media (min-width: 768px) {
+  ion-content::part(scroll) {
+    padding-left: 10%;
+    padding-right: 10%;
+  }
 }
